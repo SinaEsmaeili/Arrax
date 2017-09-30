@@ -1,0 +1,9 @@
+# audio files
+**/audio
+/audio-obj.json
+
+# api file
+**/api
+
+# modules
+node_modules/
