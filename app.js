@@ -92,7 +92,9 @@ client.on('message', message => {
             // Retreiving youtube tag from result json object
             ytTag = result.items[0].id.videoId
             var ytLink = 'https://www.youtube.com/watch?v=' + ytTag;
-            playStream(ytLink, voiceChannel);
+            playStream(ytLink, voiceChannel)
+              .then((message) => console.log(message))
+              .catch((error) => console.log(error));
           }
 
         }
@@ -103,24 +105,24 @@ client.on('message', message => {
   } else if (message.content.startsWith('!play')) {
     var args = message.content.replace('!play ', '');
 
-     youtube.search(args, 1, function (error, result) {
-        if (error) {
-          console.log(error);
+    youtube.search(args, 1, function (error, result) {
+      if (error) {
+        console.log(error);
+      } else {
+
+        // Making sure search didnt result in channel
+        if (result.items[0].id.kind == 'youtube#channel') {
+          message.reply("Be more specific!");
+
         } else {
-
-          // Making sure search didnt result in channel
-          if (result.items[0].id.kind == 'youtube#channel') {
-            message.reply("Be more specific!");
-
-          } else {
-            // Retreiving youtube tag from result json object
-            ytTag = result.items[0].id.videoId
-            var ytLink = 'https://www.youtube.com/watch?v=' + ytTag;
-            message.reply(ytLink);
-          }      
-
+          // Retreiving youtube tag from result json object
+          ytTag = result.items[0].id.videoId
+          var ytLink = 'https://www.youtube.com/watch?v=' + ytTag;
+          message.reply(ytLink);
         }
-      });
+
+      }
+    });
 
   } else {
 
@@ -132,22 +134,21 @@ client.on('message', message => {
       // Checking if a filename matches with the message content
       if (message.content.toLowerCase() === fileName) {
         var file = './audio/' + fileName + '.mp3';
-        playAudio(file, voiceChannel);
+        playAudio(file, voiceChannel)
+          .then((message) => console.log(message))
+          .catch((error) => console.log(error));
         return;
       }
 
     }
   }
 
-
-
 });
 
 // Function for play pre existing mp3 files in /audio folder
 function playAudio(audio, voiceChannel) {
 
-  // Added exception handle to prevent crashing of program if user isnt in a channel
-  try {
+  return new Promise((resolve, reject) => {
     voiceChannel.join().then(connection => {
       const dispatcher = connection.playFile(audio);
 
@@ -155,21 +156,16 @@ function playAudio(audio, voiceChannel) {
         voiceChannel.leave();
       });
 
-      console.log("Playing " + audio);
-    }).catch(err => console.log(err));
-
-  } catch (e) {
-    console.log(e.message);
-  }
+      resolve("Playing " + audio);
+    }).catch(err => reject(err));
+  });
 
 }
 
 // Function for playing youtube audio stream
 function playStream(link, voiceChannel) {
 
-  // Added exception handle to prevent crashing of program if user isnt in a channel
-  try {
-
+  return new Promise((resolve, reject) => {
     voiceChannel.join().then(connection => {
       let stream = ytdl(link, {
         filter: 'audioonly',
@@ -181,12 +177,9 @@ function playStream(link, voiceChannel) {
         voiceChannel.leave();
       });
 
-      console.log("Playing " + link);
-    }).catch(err => console.log(err));
-
-  } catch (e) {
-    console.log(e.message);
-  }
+      resolve("Playing " + link);
+    }).catch(err => reject(err));
+  });
 
 }
 
