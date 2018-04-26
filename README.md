@@ -1,4 +1,4 @@
-# Arrax
+# thronesbot
 
 Game of Thrones themed Discord bot made for my private group. Simply type specific keywords from the list and it plays an audio file in the channel. Other features such as streaming youtube audio in the channel and searching for youtube videos in chat is included.   
 
